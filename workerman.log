@@ -487,3 +487,11 @@
 2016-05-11 18:12:53 Workerman[tcp_server.php] start in DEBUG mode
 2016-05-11 18:12:54 Workerman[tcp_server.php] Stopping ...
 2016-05-11 18:12:54 Workerman[tcp_server.php] has been stopped
+2016-05-11 18:13:40 Workerman[tcp_server.php] start in DAEMON mode
+2016-05-11 18:13:40 Workerman[tcp_server.php] already running
+2016-05-11 18:13:51 Workerman[tcp_server.php] stop 
+2016-05-11 18:13:51 Workerman[tcp_server.php] is stoping ...
+2016-05-11 18:13:51 Workerman[tcp_server.php] Stopping ...
+2016-05-11 18:13:51 Workerman[tcp_server.php] has been stopped
+2016-05-11 18:13:51 Workerman[tcp_server.php] stop success
+2016-05-11 18:13:56 Workerman[tcp_server.php] start in DAEMON mode
