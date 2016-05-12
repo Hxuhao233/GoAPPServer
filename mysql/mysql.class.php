@@ -24,7 +24,7 @@ class mysqlHandler
 	 }
 */
 	public function __construct($db,$table){
-		$this->link = new mysqli("127.0.0.1", "root", "", "$db");
+		$this->link = new mysqli("127.0.0.1", "root", "hxh896900488", "$db");
 		$this->link->query("SET NAMES utf8");
 		$this->table = $table;
 	}

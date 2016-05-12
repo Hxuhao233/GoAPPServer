@@ -5,6 +5,7 @@ use Workerman\Lib\Timer;
 require_once './Workerman/Autoloader.php';
 require_once './user.class.php';
 require_once './getPOI.php';
+require_once './msgHander.class.php';
 
 /**
  * 要不要写成一个类呢= =
@@ -57,10 +58,11 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 	if(!isset($jsonData["action"])){
 		$errormsg=array(
 					"code"=>414,
-					"msg" => "error type"
+					"data" => array("msg"=>"error msg type")
 					);
 		//echo "from ". $connection->getRemoteIp()."\n";
-	//	sleep(1);
+		$connection->send(json_encode($errormsg));
+		sleep(5);
 		if($connection->send(json_encode($errormsg)))
 			echo "send succeed\n";
 
@@ -145,7 +147,10 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 		default:
 			$errormsg=array("code"=>444,
-					"msg" => "unknown msg type");
+					"data" => array("msg"=>"unknown msg type"));
+			$connection->send(json_encode($errormsg));
+		
+			sleep(5);
 			$connection->send(json_encode($errormsg));
 			break;
 

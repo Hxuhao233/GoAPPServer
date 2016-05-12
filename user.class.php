@@ -33,28 +33,29 @@ class user{
 					$result = $mysqli->select($col,$conditions);
 					$name = $result->fetch_assoc()["name"];
 					$returnData=array(
-								"result" => "OK",
-								"name" => $name
+								"action"=>"Login",
+								"code" => 200,
+								"data" => array("name" => $name)
 								);	//成功返回用户名
 					return $returnData;
 				}else{
 					$returnData=array(
-								"result" => "fail",
-								"reson" => "用户已登录"
+								"action"=>"Login",
+								"code" => 202
 								);	//已登录
 					return $returnData;
 				}
 			}
 		}else{
 			$returnData=array(
-						"result" => "fail",
-						"reson" => "张号或密码错误"
+						"action"=>"Login",
+						"code" => 204
 						);			//账号或密码错误
 			return $returnData;
 		}
 		$returnData = array(
-					"result"=>"fail",
-					"reson"=>"未知错误，稍后再试。"
+					"action"=>"Login",
+					"code" => 201
 					);
 		return $returnData;
 
@@ -80,13 +81,17 @@ class user{
 		//var_dump($result);
 		if($mysqli->getLink()->affected_rows==1){
 			$returnData = array(
-						"result" => "OK",
-						"info" => "logout "
+						"action" => 200,
+						"action" => "Logout "
 						);
 			return $returnData;
 		}
-
-		return false;
+		$returnData = array(
+						"action" => 201,
+						"action" => "Logout "
+						);
+		return $returnData;
+		
 
 	}
 
@@ -118,21 +123,23 @@ class user{
 
 				if($result = $mysqli->insert($insertData)){
 					$returnData = array(
-						"result"=>"OK");
+								"action"=>"Signin",
+								"code"=>200
+								);
 					return $returnData;
 				}
 
 			}else{
 				$returnData = array(
-							"result"=>"failed",
-							"reson"=>"账号已被注册"
+							"action"=>"Signin",
+							"code"=>202
 							);
 				return $returnData;
 			}
 		}
 		$returnData = array(
-					"result"=>"fail",
-					"reson"=>"未知错误，稍后再试。"
+					"action"=>"Signin",
+					"code"=>201
 					);
 		return $returnData;
 	}
@@ -155,17 +162,17 @@ class user{
 		$mysqli = new mysqlHandler("GoAPP","offlineMsg");
 		$col = "*";
 		$conditions = array(
-							'receiver' => $name
-							);
+					'receiver' => $name
+					);
 		$i=0;
-    $arr=array();
-    if($result = $mysqli->select($col,$conditions)){
-    		while ($row = mysqli_fetch_row($result)) {
-    			$arr[$i++]=array(
-    				'sender'=>$row[1],
-    				'receiver'=>$row[2],
-    				'meg'=>$row[3]
-    				);
+		$arr=array();
+		if($result = $mysqli->select($col,$conditions)){
+		    	while ($row = mysqli_fetch_row($result)) {
+		    		$arr[$i++]=array(
+			   				'sender'=>$row[1],
+			    				'receiver'=>$row[2],
+			    				'meg'=>$row[3]
+			    				);
     		}
 
     	return $arr;
