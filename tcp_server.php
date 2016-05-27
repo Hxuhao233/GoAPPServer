@@ -206,7 +206,8 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 							"code"=>200,
 							"data"=> array(json_encode(array("name" => " 1" )))
 							);
-				$connection->send(json_encode($returnData));
+				//sleep(10);
+				//$connection->send(json_encode($returnData));
 			}
 			else{
 
@@ -278,6 +279,7 @@ function sendMessageByUid($msg)
 	if(isset($tcp_worker->connectionsID[$receiver]))
 	{
 	        	$connection = $tcp_worker->connectionsID[$receiver];
+	        	//sleep(10);
 	        	$connection->send(json_encode($newmsg));
 	        	return true;
     	}else{
