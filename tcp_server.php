@@ -12,7 +12,7 @@ require_once './msgHander.class.php';
  */
 
 
-// 创建一个Worker监听2347端口，不使用任何应用层协议
+// 创建一个Worker监听6666端口，不使用任何应用层协议
 $tcp_worker = new Worker("tcp://0.0.0.0:6666");
 
 //创建管理用户链接的数组
@@ -93,7 +93,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 				//获取该用户的离线消息
 
 			}
-			$connection->send(json_encode($returnData));
+			//$connection->send(json_encode($returnData));
 			break;
 
 
@@ -117,7 +117,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 							);
 			}
 
-			$connection->send(json_encode($returnData));
+			//$connection->send(json_encode($returnData));
 			break;
 
 		//注册
@@ -126,7 +126,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$returnData = user::signIn($userData);
 
 
-			$connection->send(json_encode($returnData));
+			//$connection->send(json_encode($returnData));
 			break;
 
 
@@ -136,7 +136,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$returnData = user::setIcon();
 
 
-			$connection->send(json_encode($returnData));
+			//$connection->send(json_encode($returnData));
 			break;
 
 
@@ -148,7 +148,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$returnData = user::getInfomation($account);
 
 
-			$connection->send(json_encode($returnData));
+			//$connection->send(json_encode($returnData));
 			break;
 
 		//添加好友
@@ -166,11 +166,11 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 									"code"=>200,
 									"data"=>array("type"=>"apply")
 									);
-						$connection->send("send succeed\n");
+						//$connection->send("send succeed\n");
 					}
 					else{
 
-						$connection->send('send failed\n');
+						//$connection->send('send failed\n');
 					}
 				
 					break;
@@ -208,6 +208,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 							);
 				//sleep(10);
 				//$connection->send(json_encode($returnData));
+				flush();
 			}
 			else{
 
@@ -215,22 +216,23 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 							"action"=>"Chat",
 							"code"=>300
 							);
-				$connection->send(json_encode($returnData));
+				//$connection->send(json_encode($returnData));
 			}
 			break;
 
 		default:
-			$errormsg=array(
+			$returnData=array(
 					"code"=>444,
 					"data" => array("msg"=>"unknown msg type")
 					);
-			$connection->send(json_encode($errormsg));
+			//$connection->send(json_encode($errormsg));
 
 			sleep(5);
-			$connection->send(json_encode($errormsg));
+			//$connection->send(json_encode($errormsg));
 			break;
 
 	}
+	$connection->send(json_encode($returnData));
 
 };
 
@@ -270,9 +272,9 @@ function sendMessageByUid($msg)
 	$receiver=$msg["receiver"];
 	$newmsg=array(
 			"action"=>"Chat",
+			"code"=>200,
+			"data"=>array(json_encode($msg))
 			
-			"data"=>array(json_encode($msg)),
-			"code"=>200
 			);
 	$returnData=array();
 	//var_dump($newmsg);
@@ -281,6 +283,7 @@ function sendMessageByUid($msg)
 	        	$connection = $tcp_worker->connectionsID[$receiver];
 	        	//sleep(10);
 	        	$connection->send(json_encode($newmsg));
+	        	flush();
 	        	return true;
     	}else{
     		//发送离线消息
