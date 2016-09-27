@@ -392,7 +392,8 @@ class user{
 }
 
 //test
-$user1=new user;
+
+//$user1=new user;
 //	'USER01'=>"456",
 //	'USER02'=>"123"
 //	);
@@ -432,7 +433,7 @@ $info=array(
 $res =$user1->signIn($info);
 var_dump($res);
 */
-
+/*
 // 忘记密码
 $info = array(
 	"account" => "13710685836"
@@ -444,5 +445,5 @@ $info=array(
 	"password" => "1234590"
 	);
 $returnData = $user1->forgetPWD2($info);
-var_dump($returnData);
+var_dump($returnData);*/
 ?>

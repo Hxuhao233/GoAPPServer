@@ -143,7 +143,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 		case 'forgetPWD1':
 			$userData = $jsonData["data"][0];
 		
-			$returnData = user->forgetPWD1($userData);
+			$returnData = $user->forgetPWD1($userData);
 
 			break;
 
@@ -151,7 +151,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 		case 'forgetPWD2':
 			$userData = $jsonData["data"][0];
 
-			$returnData = user->forgetPWD1($userData);
+			$returnData = $user->forgetPWD1($userData);
 
 			break;
 
@@ -247,7 +247,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 	}
 	$connection->send(json_encode($returnData));
-
+	
 };
 
 //当客户端连接错误时
