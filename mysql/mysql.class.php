@@ -9,20 +9,7 @@ class mysqlHandler
 	private $table = null;
 	private $link = null;
 	private $result = null;
-/*
-	public function __set($name , $value){
-	        $this->values[$name] = $value;
-	}
 
-	public function __get($name){
-		if(isset($this->values[$name])){
-	            return $this->values[$name];
-	        }
-	        else{
-	            return null;
-	        }
-	 }
-*/
 	public function __construct($db,$table){
 		$this->link = new mysqli("127.0.0.1", "root", "hxh896900488", "$db");
 		$this->link->query("SET NAMES utf8");
@@ -35,6 +22,9 @@ class mysqlHandler
 			$this->result->free();
 	}
 
+	public function changeTable($table){
+		$this->table = $table;
+	}
 
 	public function getLink(){
 
@@ -42,14 +32,14 @@ class mysqlHandler
 	}
 
 
-	private function clear($data){
+	public function clear($data){
 		return $this->link->real_escape_string($data);
 	}
 
-	private function excute($query){
+	public function excute($query){
 		//$this->result = $this->link->query($query);
 		//return $this->result;
-		echo $query;
+		//echo $query;
 		return $this->link->query($query);
 	}
 
@@ -63,8 +53,8 @@ class mysqlHandler
 			}
 			if($key=="password")
 		         	$qualifier .= "`$key`= MD5(\"" . $this->clear($value) . "\")";
-		        else
-		            	$qualifier .= "`$key`= \"" . $this->clear($value) . "\" ";
+		  else
+		  	$qualifier .= "`$key`= \"" . $this->clear($value) . "\" ";
 		 }
 		//echo $qualifier;
 		$sql .=  $qualifier ? "WHERE $qualifier " :null;
@@ -75,6 +65,7 @@ class mysqlHandler
 
 	public function update($data=array() ,$condition=array()){
 		$updateData = "";
+		//var_dump($condition);
 		//$data = $this->link->real_escape_string($data);
 		foreach($data as $key => $value){
 			if($key=="password")
@@ -98,7 +89,7 @@ class mysqlHandler
 
 		$sql = "UPDATE `$this->table` SET $updateData ";
 		$sql .=  $qualifier ? "WHERE $qualifier " :null;
-	//	echo $sql;
+		//echo $sql;
 
 		return $this->excute($sql);
 	}
