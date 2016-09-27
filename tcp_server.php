@@ -12,8 +12,8 @@ require_once './msgHander.class.php';
  */
 
 
-// 创建一个Worker监听6666端口，不使用任何应用层协议
-$tcp_worker = new Worker("tcp://0.0.0.0:6666");
+// 创建一个Worker监听2347端口，不使用任何应用层协议
+$tcp_worker = new Worker("tcp://0.0.0.0:2347");
 
 //创建管理用户链接的数组
 $tcp_worker->connectionsID = array();
@@ -247,7 +247,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 	}
 	$connection->send(json_encode($returnData));
-	
+
 };
 
 //当客户端连接错误时
