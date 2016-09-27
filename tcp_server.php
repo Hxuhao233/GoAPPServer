@@ -60,7 +60,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 	
 	//var_dump($jsonData["data"]);
 	$jsonData["data"][0]=json_decode($jsonData["data"][0],true);
-
+	$user = new user();
 	if(!isset($jsonData["action"])){
 		//var_dump($data);
 		$errormsg=array(
@@ -78,7 +78,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 	switch ($jsonData["action"]) {
 
 		//登录
-		//Login|account&password
+		//Login
 		case 'Login':
 
 			$userData=$jsonData["data"][0];
@@ -139,7 +139,21 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			//$connection->send(json_encode($returnData));
 			break;
 
+		//忘记密码1
+		case 'forgetPWD1':
+			$userData = $jsonData["data"][0];
+		
+			$returnData = user->forgetPWD1($userData);
 
+			break;
+
+		//忘记密码2
+		case 'forgetPWD2':
+			$userData = $jsonData["data"][0];
+
+			$returnData = user->forgetPWD1($userData);
+
+			break;
 
 		//搜索他人信息
 		case 'SearchPerson':
