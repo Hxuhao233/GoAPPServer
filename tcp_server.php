@@ -139,21 +139,16 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			//$connection->send(json_encode($returnData));
 			break;
 
-		//忘记密码1
-		case 'forgetPWD1':
+		//忘记密码
+		case 'forgetPWD':
 			$userData = $jsonData["data"][0];
-		
-			$returnData = $user->forgetPWD1($userData);
+			if(is_null($userData["password"]))
+				$returnData = $user->forgetPWD1($userData);
+			else
+				$returnData = $user->forgetPWD2($userData);
 
 			break;
 
-		//忘记密码2
-		case 'forgetPWD2':
-			$userData = $jsonData["data"][0];
-
-			$returnData = $user->forgetPWD1($userData);
-
-			break;
 
 		//搜索他人信息
 		case 'SearchPerson':

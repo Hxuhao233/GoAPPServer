@@ -307,7 +307,7 @@ class user{
 				(select `id` from `user` where  `account` = \"$account\")";
 		$res;
 		$returnData = array(
-			"action" => "forgetPWD1"
+			"action" => "forgetPWD"
 			);
 		// 查询密码保护问题和答案
 		if($res = $mysqli->excute($sql)){
@@ -343,7 +343,7 @@ class user{
 			);
 		$res;
 		$returnData = array(
-			"aciton" => "forgetPWD2"
+			"aciton" => "forgetPWD"
 		);
 		$res = $mysqli->update($updateData,$conditions);
 		if($mysqli->getLink()->affected_rows == 1){
