@@ -150,7 +150,7 @@ class user{
 								"action"=>"Signin",
 								"code"=>200
 								);
-						$result->close();
+						//$result->close();
 						return $returnData;
 					}
 				}
@@ -288,7 +288,7 @@ class user{
     			$returnData["code"]=208;
     			
     		}
-    		$result->close();
+    		//$result->close();
     		return $returnData;
 
    		
@@ -307,18 +307,23 @@ class user{
 				(select `id` from `user` where  `account` = \"$account\")";
 		$res;
 		$returnData = array(
-			"action" => "forgetPWD"
+			"action" => "FindPwd"
 			);
 		// 查询密码保护问题和答案
 		if($res = $mysqli->excute($sql)){
 			$QA = $res->fetch_assoc();
 			//var_dump($QA);
 			$returnData["code"] = 200;
-			$returnData["data"] = array(
-				"Question" => $QA["Question"],
-				"Answer" => $QA["Answer"]
+			var_dump($QA);
+			$data = array(
+				"question" => $QA["Question"],
+				"answer" => $QA["Answer"],
+				"account" => $account,
+				"password" => " ",
 				);
-			$res->close();
+			$returnData["data"][0] = json_encode($data);
+			
+			//$res->close();
 		}else{
 			$returnData["code"] = 207;
 		}
@@ -343,14 +348,21 @@ class user{
 			);
 		$res;
 		$returnData = array(
-			"aciton" => "forgetPWD"
+			"action" => "FindPwd"
 		);
+
 		$res = $mysqli->update($updateData,$conditions);
 		if($mysqli->getLink()->affected_rows == 1){
 			$returnData["code"] = 200;
 		}else{
 			$returnData["code"] = 207;
 		}
+		$returnData["data"][0] = json_encode(array(
+				"question" => " ",
+				"answer" => " ",
+				"account" => $account,
+				"password" => $password,
+				));
 
 		return $returnData;
 	}
@@ -384,7 +396,7 @@ class user{
 			$result = $mysqli->select($col,$conditions);
 			$row=mysqli_fetch_row($result);
 			$mysqli->delete($row[0]);
-			$result->close();
+			//$result->close();
 		}
 
 	}

@@ -140,9 +140,9 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			break;
 
 		//忘记密码
-		case 'forgetPWD':
+		case 'FindPwd':
 			$userData = $jsonData["data"][0];
-			if(is_null($userData["password"]))
+			if(!isset($userData["password"]))
 				$returnData = $user->forgetPWD1($userData);
 			else
 				$returnData = $user->forgetPWD2($userData);
@@ -223,7 +223,8 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 				$returnData = array(
 							"action"=>"Chat",
-							"code"=>300
+							"code"=>300,
+							
 							);
 				//$connection->send(json_encode($returnData));
 			}
@@ -241,6 +242,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			break;
 
 	}
+	var_dump(json_encode($returnData));
 	$connection->send(json_encode($returnData));
 
 };
