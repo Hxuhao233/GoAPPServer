@@ -50,6 +50,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 {
 	//global $tcp_worker;
 	//var_dump($data);
+
 	$data=str_replace("\r\n", "",$data);
 	echo "$data\n";
 	
@@ -200,6 +201,17 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 
 			break;
+
+		// 获取好友信息
+		case 'getFriends':
+			
+			$returnData = user::getFriends();
+
+
+		break;
+
+
+
 
 		//发送消息
 		//Send|reciverName&message
