@@ -36,7 +36,7 @@ class mysqlHandler
 		return $this->link->real_escape_string($data);
 	}
 
-	public function excute($query){
+	public function execute($query){
 		//$this->result = $this->link->query($query);
 		//return $this->result;
 		echo $query;
