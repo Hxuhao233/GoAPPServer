@@ -91,14 +91,14 @@ class mysqlHandler
 		$sql .=  $qualifier ? "WHERE $qualifier " :null;
 		//echo $sql;
 
-		return $this->excute($sql);
+		return $this->execute($sql);
 	}
 
 	public function delete($id){
 
 		$sql= "DELETE FROM `$this->table`  WHERE `id` = $id";
 
-		return $this->excute($sql);
+		return $this->execute($sql);
 	}
 
 	public function insert($data=array()){
@@ -118,7 +118,7 @@ class mysqlHandler
 		$sql="INSERT INTO `$this->table` (".$colNames.") VALUES (".$colValues .')';
 		//echo $sql;
 
-		return $this->excute($sql);
+		return $this->execute($sql);
 	}
 
 
