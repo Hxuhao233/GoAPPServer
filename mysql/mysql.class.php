@@ -39,7 +39,7 @@ class mysqlHandler
 	public function execute($query){
 		//$this->result = $this->link->query($query);
 		//return $this->result;
-		echo $query;
+		//echo $query;
 		return $this->link->query($query);
 	}
 

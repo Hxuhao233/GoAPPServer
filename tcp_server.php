@@ -264,6 +264,20 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 			break;
 
+		
+		// 查找用户
+		case 'searchUser':
+			$returnData;
+			$info = $jsonData['data'][0]['info'];
+			
+			$UserInfo = user::getUserInfo($info);
+			$returnData['action'] = 'searchUser';
+			$returnData['code'] = 200;
+			$returnData['data'] = $info;
+
+			$connection->send(json_encode($returnData));
+			
+			break;
 
 
 		// 获取好友信息

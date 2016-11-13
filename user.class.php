@@ -243,12 +243,28 @@ class user{
       //var_dump($FriendsInfo);
     }
 
-
-
-
       return $returnData;
-
   }
+
+
+  
+  public static function getUserInfo($searchInfo){
+    $mysqli = new mysqlHandler("GoAPP","user");
+    $returnData = array();
+    $sql = "select `user`.`account` , `information`.`Name` 
+                from `user`,`information`  
+                where  `user`.`id` = `information`.`UserId` 
+                and (`account` regexp \"$searchInfo+\" or `Name` regexp \"$searchInfo+\")";
+    if($result = $mysqli->execute($sql)){
+      $i=0;
+      while($row = $result->fetch_assoc()){
+        $returnData["data"][$i++] = json_encode($row);
+      }
+    }
+    return $returnData; 
+  }
+
+
 
 
 
@@ -499,6 +515,6 @@ var_dump($returnData);*/
 var_dump(expression);
 echo json_encode($d1);
 */
-//$data = user::getFriends("abc");
+//$data = user::getUserInfo("1");
 //echo json_encode($data);
 ?>
