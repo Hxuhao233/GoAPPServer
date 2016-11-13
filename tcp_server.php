@@ -305,7 +305,7 @@ function sendMessageByUid($msg,$code,$action,$receiver)
 			"code"=>$code,
 			"data"=>array(json_encode($msg))		
 			);
-	
+
 	$returnData=array();
 	//var_dump($newmsg);
 	if(isset($tcp_worker->connectionsID[$receiver]))
@@ -322,7 +322,6 @@ function sendMessageByUid($msg,$code,$action,$receiver)
     	}
 }
 
-function 
 
 
 
