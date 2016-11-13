@@ -321,8 +321,7 @@ function sendMessageByUid($msg,$code,$action,$receiver)
     		return false;
     	}
 }
-
-function 
+ 
 
 
 
