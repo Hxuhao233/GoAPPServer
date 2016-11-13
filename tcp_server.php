@@ -66,7 +66,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 		//var_dump($data);
 		$errormsg=array(
 					"code"=>414,
-					"data" => array("msg"=>"error msg type")
+					"data" => array(json_encode(array("msg"=>"error msg type")))
 					);
 		//echo "from ". $connection->getRemoteIp()."\n";
 		$connection->send(json_encode($errormsg));
@@ -166,41 +166,44 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$returnData;
 			$msg = $jsonData["data"][0];
 			//$msg["receiver"] = $msg[];
-			switch ($msg["type"]) {
-				case 'apply':
-					# code...
-					
-					if(sendMessageByUid($msg)){
-						$returnData = array(
-									"action"=>"AddFriend",
-									"code"=>200,
-									"data"=>array("type"=>"apply")
-									);
-						//$connection->send("send succeed\n");
-					}
-					else{
+			
+			//对接受请求者发送
+			$data1 = array(
+					"account" => $msg['account'],
+					"name" => $msg['name']
+							);
+			// $sendData = array(
+			// 		"code" => 300,
+			// 		"action" => "AddFriend",
+			// 		"data" => array(json_encode($data1))
+			// 				);
+			if(sendMessageByUid($data1,300,"AddFriend",$msg["targetAccount"])){
+				//对发送请求者发送
+				$returnData = array(
+						"action" => 'AddFriend',
+						"code" => 200,
+								);
 
-						//$connection->send('send failed\n');
-					}
-				
-					break;
-
-				case 'agree':
-					$accounts=array(
-								"USER01"=>$msg["receiver"],
-								"USER02"=>$msg["applyer"]);
-					$returnData = user::makeFriends();
-					sendMessageByUid();
-					break;
-				default:
-					# code...
-					break;
+			}else{
+				$returnData = array(
+						"action" => 'AddFriend',
+						"code" => 400,
+				);				
 			}
-				
+			break;
 
-
+		//接受好友请求
+		case 'AcceptFriend':
 
 			break;
+
+
+		//拒绝好友请求
+		case 'RefuseFriend':
+
+			break;
+
+
 
 		// 获取好友信息
 		case 'getFriends':
@@ -221,11 +224,11 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$msg = $jsonData["data"][0];
 			var_dump($msg);
 			//var_dump($msg);
-			if(sendMessageByUid($msg)){
+			if(sendMessageByUid($msg,200,'Chat',$msg['receiver'])){
 				$returnData = array(
 							"action"=>"Chat1",
 							"code"=>200,
-							"data"=> array(json_encode(array("name" => " 1" )))
+							"data"=> array(json_encode(array("name" => "1" )))
 							);
 				//sleep(10);
 				//$connection->send(json_encode($returnData));
@@ -235,7 +238,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 				$returnData = array(
 							"action"=>"Chat",
-							"code"=>300,
+							"code"=>400,
 							
 							);
 				//$connection->send(json_encode($returnData));
@@ -288,17 +291,21 @@ $tcp_worker->onWorkerStop = function($worker)
 };
 
 //通过connectionID发送消息
-function sendMessageByUid($msg)
+function sendMessageByUid($msg,$code,$action,$receiver)
 {
 	global $tcp_worker;
 	//var_dump($msg);
-	$receiver=$msg["receiver"];
+	//$receiver=$msg["receiver"];
+	
+	if(is_null($receiver) || $receiver =="")
+		return false;
+
 	$newmsg=array(
-			"action"=>"Chat",
-			"code"=>200,
-			"data"=>array(json_encode($msg))
-			
+			"action"=>$action,
+			"code"=>$code,
+			"data"=>array(json_encode($msg))		
 			);
+	
 	$returnData=array();
 	//var_dump($newmsg);
 	if(isset($tcp_worker->connectionsID[$receiver]))
@@ -315,6 +322,7 @@ function sendMessageByUid($msg)
     	}
 }
 
+function 
 
 
 

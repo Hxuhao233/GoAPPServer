@@ -59,7 +59,7 @@ class mysqlHandler
 		//echo $qualifier;
 		$sql .=  $qualifier ? "WHERE $qualifier " :null;
 		//echo $sql;
-		return $this->excute($sql);
+		return $this->execute($sql);
 	}
 
 
