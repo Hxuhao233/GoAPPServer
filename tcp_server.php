@@ -94,7 +94,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 				//获取该用户的离线消息
 
 			}
-			//$connection->send(json_encode($returnData));
+			$connection->send(json_encode($returnData));
 			break;
 
 
@@ -118,7 +118,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 							);
 			}
 
-			//$connection->send(json_encode($returnData));
+			$connection->send(json_encode($returnData));
 			break;
 
 		//注册
@@ -127,7 +127,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$returnData = user::signIn($userData);
 
 
-			//$connection->send(json_encode($returnData));
+			$connection->send(json_encode($returnData));
 			break;
 
 
@@ -137,7 +137,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$returnData = user::setIcon();
 
 
-			//$connection->send(json_encode($returnData));
+			$connection->send(json_encode($returnData));
 			break;
 
 		//忘记密码
@@ -148,6 +148,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			else
 				$returnData = $user->forgetPWD2($userData);
 
+			$connection->send(json_encode($returnData));
 			break;
 
 
@@ -158,7 +159,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$returnData = user::getInfomation($account);
 
 
-			//$connection->send(json_encode($returnData));
+			$connection->send(json_encode($returnData));
 			break;
 
 		//添加好友
@@ -180,14 +181,14 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			if(sendMessageByUid($data1,300,"AddFriend",$msg["targetAccount"])){
 				//对发送请求者发送
 				$returnData = array(
-						"action" => 'AddFriend',
-						"code" => 200,
+						'action' => 'AddFriend',
+						'code' => 200,
 								);
-
+				$connection->send(json_encode($returnData));
 			}else{
 				$returnData = array(
-						"action" => 'AddFriend',
-						"code" => 400,
+						'action' => 'AddFriend',
+						'code' => 400,
 				);				
 			}
 			break;
@@ -195,11 +196,71 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 		//接受好友请求
 		case 'AcceptFriend':
 
+			$msg = $jsonData["data"][0];
+			
+
+			$newFriend = array(
+				'USER01' => $msg['account'],
+				'USER02' => $msg['targetAccount']
+				);
+			user::makeFriends($newFriend);
+
+			//向发起好友者发送
+			$data2 = array(
+					'account' => $msg['account'],
+					'targetAccount' => $msg['targetAccount']
+				);
+			if(sendMessageByUid($data2,300,'AcceptFriend',$msg['account'])){
+				
+				//向接受好友请求者发送
+				$returnData = array(
+					'action' => 'AcceptFriend',
+					'code' => 200
+					);
+				$connection->send(json_encode($returnData));
+			}else{
+				$returnData = array(
+					'action' => 'AcceptFriend',
+					'code' => 400
+					);
+			}
+
+
+
 			break;
 
 
 		//拒绝好友请求
 		case 'RefuseFriend':
+
+			$msg = $jsonData["data"][0];
+			
+
+			$newFriend = array(
+				'USER01' => $msg['account'],
+				'USER02' => $msg['targetAccount']
+				);
+
+			//向发起好友者发送
+			$data2 = array(
+					'account' => $msg['account'],
+					'targetAccount' => $msg['targetAccount']
+				);
+			if(sendMessageByUid($data2,300,'RefuseFriend',$msg['account'])){
+				
+				//向接受好友请求者发送
+				$returnData = array(
+					'action' => 'RefuseFriend',
+					'code' => 200
+					);
+				$connection->send(json_encode($returnData));
+			}else{
+				$returnData = array(
+					'action' => 'RefuseFriend',
+					'code' => 400
+					);
+			}
+
 
 			break;
 
@@ -210,7 +271,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			
 			$returnData = user::getFriends();
 
-
+			$connection->send(json_encode($returnData));
 		break;
 
 
@@ -241,8 +302,9 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 							"code"=>400,
 							
 							);
-				//$connection->send(json_encode($returnData));
+				
 			}
+			$connection->send(json_encode($returnData));
 			break;
 
 		default:
@@ -253,12 +315,12 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			//$connection->send(json_encode($errormsg));
 
 			sleep(5);
-			//$connection->send(json_encode($errormsg));
+			$connection->send(json_encode($errormsg));
 			break;
 
 	}
 	var_dump(json_encode($returnData));
-	$connection->send(json_encode($returnData));
+	//$connection->send(json_encode($returnData));
 
 };
 
@@ -305,7 +367,7 @@ function sendMessageByUid($msg,$code,$action,$receiver)
 			"code"=>$code,
 			"data"=>array(json_encode($msg))		
 			);
-	
+
 	$returnData=array();
 	//var_dump($newmsg);
 	if(isset($tcp_worker->connectionsID[$receiver]))
@@ -321,7 +383,6 @@ function sendMessageByUid($msg,$code,$action,$receiver)
     		return false;
     	}
 }
- 
 
 
 
