@@ -1,3 +1,10 @@
 2016-11-13 16:42:28 Workerman[tcp_server.php] start in DEBUG mode
 2016-11-13 16:42:30 Workerman[tcp_server.php] Stopping ...
 2016-11-13 16:42:30 Workerman[tcp_server.php] has been stopped
+2016-11-13 19:14:16 Workerman[tcp_server.php] start in DAEMON mode
+2016-11-14 10:00:16 Workerman[tcp_server.php] status 
+2016-11-14 15:45:09 Workerman[tcp_server.php] stop 
+2016-11-14 15:45:09 Workerman[tcp_server.php] is stoping ...
+2016-11-14 15:45:09 Workerman[tcp_server.php] Stopping ...
+2016-11-14 15:45:09 Workerman[tcp_server.php] has been stopped
+2016-11-14 15:45:09 Workerman[tcp_server.php] stop success
