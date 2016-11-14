@@ -269,7 +269,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 		case 'GetUserInfo':
 			$returnData;
 			$info = $jsonData['data'][0]['info'];
-			if(!is_null($info)){
+			if(!is_null($info) && $info !=""){
 				$UserInfo = user::getUserInfo($info);
 			}	
 			$returnData['action'] = 'searchUser';
