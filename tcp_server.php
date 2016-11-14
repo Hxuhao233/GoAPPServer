@@ -266,7 +266,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 		
 		// 查找用户
-		case 'searchUser':
+		case 'GetUserInfo':
 			$returnData;
 			$info = $jsonData['data'][0]['info'];
 			
@@ -281,7 +281,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 
 		// 获取好友信息
-		case 'getFriends':
+		case 'GetFriends':
 			
 			$returnData = user::getFriends();
 
