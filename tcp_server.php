@@ -269,12 +269,13 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 		case 'GetUserInfo':
 			$returnData;
 			$info = $jsonData['data'][0]['info'];
-			
-			$UserInfo = user::getUserInfo($info);
+			if(!is_null($info)){
+				$UserInfo = user::getUserInfo($info);
+			}	
 			$returnData['action'] = 'searchUser';
 			$returnData['code'] = 200;
-			$returnData['data'] = $info;
-
+			$returnData['data'] = $UserInfo;
+	
 			$connection->send(json_encode($returnData));
 			
 			break;
