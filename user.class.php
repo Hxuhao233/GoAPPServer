@@ -112,7 +112,7 @@ class user{
    * @param  array  $userData [0] 用户名 [1] 密码
    * @return [bool]           [成功 TRUE 失败 FALSE]
    */
-  public static function signIn($userData = array()){
+  public static function signUp($userData = array()){
     $mysqli = new mysqlHandler("GoAPP","user");
     $userAccount = $userData["account"];
     $col = "COUNT(*)";
@@ -147,7 +147,7 @@ class user{
           $mysqli->insert($insertData);
           if($result = $mysqli->insert($insertData)){
             $returnData = array(
-                "action"=>"Signin",
+                "action"=>"Signup",
                 "code"=>200
                 );
             //$result->close();
