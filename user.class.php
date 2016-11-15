@@ -44,7 +44,7 @@ class user{
           $returnData=array(
                 "action"=>"Login",
                 "code" => 200,
-                "data" => array(json_encode(array("name" => $name)))
+                "data" => array(json_encode(array("Name" => $name)))
                 );  //成功返回用户名
           var_dump($returnData);
           return $returnData;
@@ -144,7 +144,6 @@ class user{
               'Answer' => $userData["answer"]
               );
           $mysqli->changeTable("information");
-          $mysqli->insert($insertData);
           if($result = $mysqli->insert($insertData)){
             $returnData = array(
                 "action"=>"Signup",
@@ -157,14 +156,14 @@ class user{
 
       }else{
         $returnData = array(
-              "action"=>"Signin",
+              "action"=>"Signup",
               "code"=>202
               );
         return $returnData;
       }
     }
     $returnData = array(
-          "action"=>"Signin",
+          "action"=>"Signup",
           "code"=>201
           );
     return $returnData;
@@ -211,7 +210,7 @@ class user{
         "action"=>"SearchPerson",
         "code"=>207
         );
-
+    var_dump($returnData);
     return $returnData;
   }
 
@@ -232,7 +231,7 @@ class user{
     $i = 0;
     if($result = $mysqli->execute($sql)){
       $returnData["code"] = 200;
-      $returnData["action"] = "getFriends";
+      $returnData["action"] = "GetFriends";
       $returnData["data"] = array();
       while($row=mysqli_fetch_row($result)){
         $FriendsInfo[$i]["account"] = $row[0];
@@ -258,9 +257,10 @@ class user{
     if($result = $mysqli->execute($sql)){
       $i=0;
       while($row = $result->fetch_assoc()){
-        $returnData["data"][$i++] = json_encode($row);
+        $returnData[$i++] = json_encode($row);
       }
     }
+    //var_dump($returnData);
     return $returnData; 
   }
 
