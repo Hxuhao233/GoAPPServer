@@ -157,14 +157,14 @@ class user{
 
       }else{
         $returnData = array(
-              "action"=>"Signin",
+              "action"=>"Signup",
               "code"=>202
               );
         return $returnData;
       }
     }
     $returnData = array(
-          "action"=>"Signin",
+          "action"=>"Signup",
           "code"=>201
           );
     return $returnData;
