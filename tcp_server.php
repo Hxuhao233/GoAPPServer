@@ -212,7 +212,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 				);
 			user::makeFriends($newFriend);
 
-			$data2
+			$data2;
 			//向发起好友者发送
 			foreach ($msg as $key => $value) {
 				# code...
@@ -246,7 +246,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			
 
 			//向发起好友者发送
-
+                        $data2;
 			foreach ($msg as $key => $value) {
 				# code...
 				$data2[$key] = $value;
