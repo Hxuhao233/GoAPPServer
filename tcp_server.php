@@ -26,9 +26,12 @@ $tcp_worker->onWorkerStart = function($worker)
 	
 	// 定时，每10秒一次
 	Timer::add(10, function()use($worker)
-     	{	echo "online user :\n";
+     	{	
+
+
      		foreach ($worker->connectionsID as $key => $value) {
      			# code...
+     			echo "online user :";
      			echo "$key\n";
      		}
     	 });
@@ -65,7 +68,9 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 	if(!isset($jsonData["action"])){
 		//var_dump($data);
 		$errormsg=array(
+					"action" => $jsonData["action"],
 					"code"=>414,
+					
 					"data" => array(json_encode(array("msg"=>"error msg type")))
 					);
 		//echo "from ". $connection->getRemoteIp()."\n";
@@ -272,7 +277,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			if(!is_null($info) && $info !=""){
 				$UserInfo = user::getUserInfo($info);
 			}	
-			$returnData['action'] = 'searchUser';
+			$returnData['action'] = 'GetUserInfo';
 			$returnData['code'] = 200;
 			$returnData['data'] = $UserInfo;
 	
@@ -324,13 +329,14 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 		default:
 			$returnData=array(
-					"code"=>444,
+					"action" => $jsonData["action"],
+					"code" => 444,
 					"data" => array("msg"=>"unknown msg type")
 					);
 			//$connection->send(json_encode($errormsg));
 
 			sleep(5);
-			$connection->send(json_encode($errormsg));
+			$connection->send(json_encode($returnData));
 			break;
 
 	}
