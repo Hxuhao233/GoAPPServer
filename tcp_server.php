@@ -172,12 +172,12 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$returnData;
 			$msg = $jsonData["data"][0];
 			//$msg["receiver"] = $msg[];
-			
+			$data1;
 			//对接受请求者发送
-			$data1 = array(
-					"account" => $msg['account'],
-					"name" => $msg['name']
-							);
+			foreach ($msg as $key => $value) {
+				# code...
+				$data1[$key] = $value;
+			}
 			// $sendData = array(
 			// 		"code" => 300,
 			// 		"action" => "AddFriend",
@@ -189,13 +189,15 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 						'action' => 'AddFriend',
 						'code' => 200,
 								);
-				$connection->send(json_encode($returnData));
+
 			}else{
 				$returnData = array(
 						'action' => 'AddFriend',
 						'code' => 400,
 				);				
 			}
+
+			$connection->send(json_encode($returnData));
 			break;
 
 		//接受好友请求
@@ -210,11 +212,12 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 				);
 			user::makeFriends($newFriend);
 
+			$data2
 			//向发起好友者发送
-			$data2 = array(
-					'account' => $msg['account'],
-					'targetAccount' => $msg['targetAccount']
-				);
+			foreach ($msg as $key => $value) {
+				# code...
+				$data2[$key] = $value;
+			}
 			if(sendMessageByUid($data2,300,'AcceptFriend',$msg['account'])){
 				
 				//向接受好友请求者发送
@@ -222,16 +225,17 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 					'action' => 'AcceptFriend',
 					'code' => 200
 					);
-				$connection->send(json_encode($returnData));
+				
 			}else{
 				$returnData = array(
 					'action' => 'AcceptFriend',
 					'code' => 400
 					);
+				
 			}
 
 
-
+			$connection->send(json_encode($returnData));
 			break;
 
 
@@ -241,16 +245,13 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$msg = $jsonData["data"][0];
 			
 
-			$newFriend = array(
-				'USER01' => $msg['account'],
-				'USER02' => $msg['targetAccount']
-				);
-
 			//向发起好友者发送
-			$data2 = array(
-					'account' => $msg['account'],
-					'targetAccount' => $msg['targetAccount']
-				);
+
+			foreach ($msg as $key => $value) {
+				# code...
+				$data2[$key] = $value;
+			}
+
 			if(sendMessageByUid($data2,300,'RefuseFriend',$msg['account'])){
 				
 				//向接受好友请求者发送
@@ -258,15 +259,16 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 					'action' => 'RefuseFriend',
 					'code' => 200
 					);
-				$connection->send(json_encode($returnData));
+				
 			}else{
 				$returnData = array(
 					'action' => 'RefuseFriend',
 					'code' => 400
 					);
+	
 			}
 
-
+			$connection->send(json_encode($returnData));
 			break;
 
 		
