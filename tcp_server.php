@@ -97,7 +97,18 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 				$tcp_worker->connectionsID[$connection->uid] = $connection;
 				$connection->send(json_encode($returnData));
 
-				//获取该用户的离线好友请求
+				//获取该用户的离线请求
+				$offlineMsg1 = $user::getOfflineMsg('text',$userData["account"]);
+				if(!empty($offlineMsg1)){
+					$offlineMsg = array(
+							"action" => "Chat",
+							"code" => 300,
+							"data" => $offlineMsg1
+						);
+					//echo json_encode($offlineMsg);
+					$connection->send(json_encode($offlineMsg));
+				}
+
 				$offlineReq = $user::getOfflineReq($userData["account"]);
 				if(!empty($offlineReq)){
 					$offlineMsg = array(
@@ -245,8 +256,8 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			
 
 			$newFriend = array(
-				'USER01' => $msg['account'],
-				'USER02' => $msg['targetAccount']
+					$msg['account'],
+					$msg['targetAccount']
 				);
 			user::makeFriends($newFriend);
 
@@ -330,9 +341,9 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 
 		// 获取好友信息
-		case 'GetFriends':
-			
-			$returnData = user::getFriends();
+		case 'GetFriendList':
+			$msg = $jsonData["data"][0];
+			$returnData = user::getFriends($msg['account']);
 
 			$connection->send(json_encode($returnData));
 		break;
@@ -348,22 +359,17 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$msg = $jsonData["data"][0];
 			var_dump($msg);
 			//var_dump($msg);
-			if(sendMessageByUid($msg,200,'Chat',$msg['receiver'])){
+			if(sendMessageByUid($msg,300,'Chat',$msg['receiver'])){
 				$returnData = array(
-							"action"=>"Chat1",
+							"action"=>"Chat",
 							"code"=>200,
-							"data"=> array(json_encode(array("name" => "1" )))
 							);
-				//sleep(10);
-				//$connection->send(json_encode($returnData));
-				
+
 			}
 			else{
-
 				$returnData = array(
 							"action"=>"Chat",
 							"code"=>200
-							
 							);
 				
 			}
@@ -452,6 +458,10 @@ function sendMessageByUid($msg,$code,$action,$receiver)
     			case 'RefuseFriend':
     				user::handleOfflineResp($action,$msg);
     				break;
+
+    			case 'Chat':
+    				user::
+
 
     			default:
     				# code...

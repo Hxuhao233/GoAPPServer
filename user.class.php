@@ -231,11 +231,11 @@ class user{
     $i = 0;
     if($result = $mysqli->execute($sql)){
       $returnData["code"] = 200;
-      $returnData["action"] = "GetFriends";
+      $returnData["action"] = "GetFriendList";
       $returnData["data"] = array();
       while($row=mysqli_fetch_row($result)){
         $FriendsInfo[$i]["account"] = $row[0];
-        $FriendsInfo[$i]["Name"] = $row[0];
+        $FriendsInfo[$i]["Name"] = $row[1];
         $returnData["data"][$i] = json_encode($FriendsInfo[$i]);
         $i++;
       }
@@ -324,28 +324,38 @@ class user{
    * @return []
    */
   public static function makeFriends($data=array()){
-    $returnData= array(
-          "action"=>"AddFriend"
-          );
-    $col = "COUNT(*)";
+
+
     $result;
-    $mysqli = new mysqlHandler("GoAPP","Friends");
-    usort($data, strnatcmp);
-    $result=$mysqli->select($col,$data);
-        if($result->fetch_assoc()[$col]==0){
-          if($result = $mysqli->insert($data)){
-            $returnData["code"]=200;
-            
-          }
-        }else{
-          $returnData["code"]=208;
-          
+    $returnCode=0;
+
+
+    $mysqli = new mysqlHandler("GoAPP","user");
+    $result = $mysqli->select('id',array('account' => $data[0]));
+    $uid1 = $result->fetch_assoc()['id'];
+    $result = $mysqli->select('id',array('account' => $data[1]));
+    $uid2 = $result->fetch_assoc()['id'];
+
+    var_dump($data);
+    $col = "COUNT(*)";
+    $mysqli->changeTable("friends");
+    $conditions = array(
+          'USER01' => $uid1,
+          'USER02' => $uid2,
+          );
+    $result=$mysqli->select($col,$conditions);
+    $row = $result->fetch_assoc();
+    if($row[$col]==0){
+      if($result = $mysqli->insert($conditions)){
+        $returnCode=200;
         }
-        //$result->close();
-        return $returnData;
-
+        
+    }else{
+      $returnCode=208;
       
-
+    }
+        //$result->close();
+    return $returnCode;
   }
 
 
@@ -459,11 +469,11 @@ class user{
 
     }
 
-    public static function getOfflineResp($action,$targetAccount){
+    public static function getOfflineResp($action,$account){
       $mysqli = new mysqlHandler("GoAPP","offlineResp");
-      $cols = "`account`, `accountName`";
+      $cols = "`targetAccount`, `targetAccountName`";
       $conditions = array(
-          "targetAccount" => $targetAccount,
+          "account" => $account,
           "action" => $action
           );
 
@@ -472,8 +482,8 @@ class user{
       $ReqData = array();
       while($row = $ReqList->fetch_assoc()){
           $data = array(
-                  'account' => $row['account'],
-                  'Name' => $row['accountName']
+                  'account' => $row['targetAccount'],
+                  'Name' => $row['targetAccountName']
               );
           $ReqData[$i++] = json_encode($data); 
       }
@@ -481,7 +491,34 @@ class user{
       return $ReqData;   
     }
 
- 
+
+    public static function setOfflineMsg($msg = array()){
+      $mysqli = new mysqlHandler("GoAPP","offlineMsg");
+      $mysqli->insert($msg);
+    }
+
+    public static function getOfflineMsg($type,$receiver){
+      $mysqli = new mysqlHandler("GoAPP","offlineMsg");
+      $col = "`type`,`sender`,`msg`";
+      $conditions = array(
+          "type" => $type,
+          "receiver" => $receiver
+        );
+      $result = $mysqli->select($col,$conditions);
+      $offlineMsg = array();
+      $i = 0;
+      while($row = $resu->fetch_assoc()){
+          $item['type'] = $type;
+          $item['sender'] = $row['sender'];
+          $item['msg'] = $row['msg'];
+          $item['receiver'] = $receiver;
+
+          $offlineMsg[$i++] = json_encode($item);
+      }
+
+      return $offlineMsg
+    }
+
 
 
   /**
@@ -492,24 +529,17 @@ class user{
   public static function deleteFriends($data = array()){
     $mysqli = new mysqlHandler("GoAPP","Friends");
     $col = "*";
+    
+    usort($data,"strnatcmp");
     $conditions = array(
           'USER01' => $data["USER01"],
           'USER02' => $data["USER02"]
           );
-    if(count($result = $mysqli->select($col,$conditions))<0){
-      $row=mysqli_fetch_row($result);
-      $mysqli->delete($row[0]);
-    }
-    else{
-      $conditions = array(
-          'USER01' => $data["USER02"],
-          'USER02' => $data["USER01"]
-          );
-      $result = $mysqli->select($col,$conditions);
-      $row=mysqli_fetch_row($result);
-      $mysqli->delete($row[0]);
-      //$result->close();
-    }
+    $result = $mysqli->select($col,$conditions);
+    $row=mysqli_fetch_row($result);
+    $mysqli->delete($row[0]);
+    
+
 
   }
 
@@ -583,9 +613,14 @@ $offlineReq = array(
         "targetAccount" => "13710685836",
         "targetAccountName" => "54321name"
     );
-user::handleOfflineReq($offlineReq);
-
-$data = user::getOfflineReq("123");
-var_dump(empty($data));
+user::handleOfflineResp('AddFriend',$offlineReq);
+user::handleOfflineResp('RefuseFriend',$offlineReq);
+$data = user::getOfflineResp('AddFriend',"13710685836");
+var_dump($data);
+$data = user::getOfflineResp('RefuseFriend',"13710685836");
+var_dump($data);*/
+/*
+$newF = array('USER01' => "123",'USER02'=>'13710685836');
+user::makeFriends($newF);
 */
 ?>
