@@ -260,7 +260,7 @@ class user{
         $returnData[$i++] = json_encode($row);
       }
     }
-    //var_dump($returnData);
+    var_dump($returnData);
     return $returnData; 
   }
 
@@ -352,7 +352,7 @@ class user{
   /**
    * 忘记密码1
    */
-  public function forgetPWD1($data=array()){
+  public static function forgetPWD1($data=array()){
 
     $mysqli = new mysqlHandler("GoAPP","user");
     $account = $mysqli->clear($data["account"]);
@@ -389,7 +389,7 @@ class user{
   /**
    * 忘记密码2
    */
-  public function forgetPWD2($data=array()){
+  public static function forgetPWD2($data=array()){
     $mysqli = new mysqlHandler("GoAPP","user");
     $account = $mysqli->clear($data["account"]);
     $password = $mysqli->clear($data["password"]);
@@ -420,9 +420,68 @@ class user{
     return $returnData;
   }
 
+  // 处理离线好友请求
+  public static function handleOfflineReq($ReqData = array()){
+        $mysqli = new mysqlHandler("GoAPP","offlineReq");
+        $ret = $mysqli->insert($ReqData);
+        var_dump($ret);
+
+  }
+
+  // 查询离线好友请求
+  public static function getOfflineReq($targetAccount){
+        $mysqli = new mysqlHandler("GoAPP","offlineReq");
+        $cols = "`account`, `accountName`";
+        $conditions = array(
+            "targetAccount" => $targetAccount
+            );
+
+        $ReqList = $mysqli->select($cols,$conditions);
+        $i=0;
+        $ReqData = array();
+        while($row = $ReqList->fetch_assoc()){
+            $data = array(
+                    'account' => $row['account'],
+                    'Name' => $row['accountName']
+                );
+            $ReqData[$i++] = json_encode($data); 
+        }
+        //var_dump($ReqData);
+        return $ReqData;
+  }
 
 
+    public static function handleOfflineResp($action,$data = array()){
+      $mysqli = new mysqlHandler("GoAPP","offlineResp");
+      $data['action'] = $action;
+      var_dump($data);
+      $mysqli->insert($data);
 
+    }
+
+    public static function getOfflineResp($action,$targetAccount){
+      $mysqli = new mysqlHandler("GoAPP","offlineResp");
+      $cols = "`account`, `accountName`";
+      $conditions = array(
+          "targetAccount" => $targetAccount,
+          "action" => $action
+          );
+
+      $ReqList = $mysqli->select($cols,$conditions);
+      $i=0;
+      $ReqData = array();
+      while($row = $ReqList->fetch_assoc()){
+          $data = array(
+                  'account' => $row['account'],
+                  'Name' => $row['accountName']
+              );
+          $ReqData[$i++] = json_encode($data); 
+      }
+      //var_dump($ReqData);
+      return $ReqData;   
+    }
+
+ 
 
 
   /**
@@ -430,9 +489,9 @@ class user{
    * @param   array  [USER01]   [USER02]
    * @return []
    */
-  public static function deleteFriends($data=array()){
-      $mysqli = new mysqlHandler("GoAPP","Friends");
-        $col = "*";
+  public static function deleteFriends($data = array()){
+    $mysqli = new mysqlHandler("GoAPP","Friends");
+    $col = "*";
     $conditions = array(
           'USER01' => $data["USER01"],
           'USER02' => $data["USER02"]
@@ -517,4 +576,16 @@ echo json_encode($d1);
 */
 //$data = user::getUserInfo("1");
 //echo json_encode($data);
+/*
+$offlineReq = array(
+        "account" => "123",
+        "accountName" => "12345name",
+        "targetAccount" => "13710685836",
+        "targetAccountName" => "54321name"
+    );
+user::handleOfflineReq($offlineReq);
+
+$data = user::getOfflineReq("123");
+var_dump(empty($data));
+*/
 ?>

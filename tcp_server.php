@@ -95,11 +95,44 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 					$connection->uid = $userData["account"] ;
 				echo $userData["account"] ." is online\n";
 				$tcp_worker->connectionsID[$connection->uid] = $connection;
+				$connection->send(json_encode($returnData));
 
-				//获取该用户的离线消息
+				//获取该用户的离线好友请求
+				$offlineReq = $user::getOfflineReq($userData["account"]);
+				if(!empty($offlineReq)){
+					$offlineMsg = array(
+							"action" => "AddFriend",
+							"code" => 300,
+							"data" => $offlineReq
+						);
+					//echo json_encode($offlineMsg);
+					$connection->send(json_encode($offlineMsg));
+				}
 
+				$offlineResp = $user::getOfflineResp('AcceptFriend',$userData["account"]);
+				if(!empty($offlineResp)){
+					$offlineMsg = array(
+							"action" => "AcceptFriend",
+							"code" => 300,
+							"data" => $offlineResp
+						);
+					//echo json_encode($offlineMsg);
+					$connection->send(json_encode($offlineMsg));
+				}
+
+				$offlineResp2 = $user::getOfflineResp('RefuseFriend',$userData["account"]);
+				if(!empty($offlineResp2)){
+					$offlineMsg = array(
+							"action" => "RefuseFriend",
+							"code" => 300,
+							"data" => $offlineResp2
+						);
+					//echo json_encode($offlineMsg);
+					$connection->send(json_encode($offlineMsg));
+				}
 			}
-			$connection->send(json_encode($returnData));
+
+
 			break;
 
 
@@ -161,7 +194,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 		case 'SearchPerson':
 
 			$account = $jsonData["data"][0]["account"];
-			$returnData = user::getInfomation($account);
+			$returnData = user::getInformation($account);
 
 
 			$connection->send(json_encode($returnData));
@@ -184,16 +217,21 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			// 		"data" => array(json_encode($data1))
 			// 				);
 			if(sendMessageByUid($data1,300,"AddFriend",$msg["targetAccount"])){
-				//对发送请求者发送
+				
+				// 对方在线
+				// 对发送请求者发送
 				$returnData = array(
 						'action' => 'AddFriend',
 						'code' => 200,
 								);
 
 			}else{
+
+				// 对方离线
+				// 对发送请求者发送
 				$returnData = array(
 						'action' => 'AddFriend',
-						'code' => 400,
+						'code' => 200,
 				);				
 			}
 
@@ -219,17 +257,20 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 				$data2[$key] = $value;
 			}
 			if(sendMessageByUid($data2,300,'AcceptFriend',$msg['account'])){
-				
-				//向接受好友请求者发送
+				// 对方在线
+				// 向接受好友请求者发送
 				$returnData = array(
 					'action' => 'AcceptFriend',
 					'code' => 200
 					);
 				
 			}else{
+
+				// 对方离线
+				// 向接受好友请求者发送
 				$returnData = array(
 					'action' => 'AcceptFriend',
-					'code' => 400
+					'code' => 200
 					);
 				
 			}
@@ -263,7 +304,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			}else{
 				$returnData = array(
 					'action' => 'RefuseFriend',
-					'code' => 400
+					'code' => 200
 					);
 	
 			}
@@ -315,13 +356,13 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 							);
 				//sleep(10);
 				//$connection->send(json_encode($returnData));
-				flush();
+				
 			}
 			else{
 
 				$returnData = array(
 							"action"=>"Chat",
-							"code"=>400,
+							"code"=>200
 							
 							);
 				
@@ -395,14 +436,27 @@ function sendMessageByUid($msg,$code,$action,$receiver)
 	//var_dump($newmsg);
 	if(isset($tcp_worker->connectionsID[$receiver]))
 	{
-	        	$connection = $tcp_worker->connectionsID[$receiver];
-	        	//sleep(10);
-	        	$connection->send(json_encode($newmsg));
-	        	flush();
-	        	return true;
+        	$connection = $tcp_worker->connectionsID[$receiver];
+        	//sleep(10);
+        	$connection->send(json_encode($newmsg));
+        	flush();
+        	return true;
     	}else{
     		//发送离线消息
+    		switch ($action) {
+    			case 'AddFriend':
+    				# code...
+    				user::handleOfflineReq($msg);
+    				break;
+    			case 'AcceptFriend':
+    			case 'RefuseFriend':
+    				user::handleOfflineResp($action,$msg);
+    				break;
 
+    			default:
+    				# code...
+    				break;
+    		}
     		return false;
     	}
 }
