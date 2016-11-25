@@ -507,7 +507,7 @@ class user{
       $result = $mysqli->select($col,$conditions);
       $offlineMsg = array();
       $i = 0;
-      while($row = $resu->fetch_assoc()){
+      while($row = $result->fetch_assoc()){
           $item['type'] = $type;
           $item['sender'] = $row['sender'];
           $item['msg'] = $row['msg'];
@@ -516,7 +516,7 @@ class user{
           $offlineMsg[$i++] = json_encode($item);
       }
 
-      return $offlineMsg
+      return $offlineMsg;
     }
 
 

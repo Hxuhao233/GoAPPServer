@@ -141,6 +141,17 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 					//echo json_encode($offlineMsg);
 					$connection->send(json_encode($offlineMsg));
 				}
+
+				$offlineMsg1 = $user::getOfflineMsg('text',$userData["account"]);
+				if(!empty($offlineMsg1)){
+					$offlineMsg = array(
+							"action" => "Chat",
+							"code" => 300,
+							"data" => $offlineMsg1
+						);
+					//echo json_encode($offlineMsg);
+					$connection->send(json_encode($offlineMsg));
+				}
 			}
 
 
@@ -362,7 +373,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			if(sendMessageByUid($msg,300,'Chat',$msg['receiver'])){
 				$returnData = array(
 							"action"=>"Chat",
-							"code"=>200,
+							"code"=>200
 							);
 
 			}
@@ -384,7 +395,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 					);
 			//$connection->send(json_encode($errormsg));
 
-			sleep(5);
+		
 			$connection->send(json_encode($returnData));
 			break;
 
@@ -460,7 +471,7 @@ function sendMessageByUid($msg,$code,$action,$receiver)
     				break;
 
     			case 'Chat':
-    				user::
+    				user::setOfflineMsg($msg);
 
 
     			default:
