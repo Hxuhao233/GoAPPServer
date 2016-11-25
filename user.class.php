@@ -499,7 +499,7 @@ class user{
 
     public static function getOfflineMsg($type,$receiver){
       $mysqli = new mysqlHandler("GoAPP","offlineMsg");
-      $col = "`type`,`sender`,`msg`";
+      $col = "`type`,`sender`,`msg`,`time`";
       $conditions = array(
           "type" => $type,
           "receiver" => $receiver
@@ -512,7 +512,7 @@ class user{
           $item['sender'] = $row['sender'];
           $item['msg'] = $row['msg'];
           $item['receiver'] = $receiver;
-
+          $item['time'] = $row['time'];
           $offlineMsg[$i++] = json_encode($item);
       }
 
