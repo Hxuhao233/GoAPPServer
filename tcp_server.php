@@ -97,18 +97,15 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 				$tcp_worker->connectionsID[$connection->uid] = $connection;
 				$connection->send(json_encode($returnData));
 
-				//获取该用户的离线请求
-				$offlineMsg1 = $user::getOfflineMsg('text',$userData["account"]);
-				if(!empty($offlineMsg1)){
-					$offlineMsg = array(
-							"action" => "Chat",
-							"code" => 300,
-							"data" => $offlineMsg1
-						);
-					//echo json_encode($offlineMsg);
-					$connection->send(json_encode($offlineMsg));
-				}
 
+
+				$friendList = user::getFriends($userData['account']);
+				if(!empty($friendList)){
+					$connection->send(json_encode($friendList));
+				}
+			
+
+				
 				$offlineReq = $user::getOfflineReq($userData["account"]);
 				if(!empty($offlineReq)){
 					$offlineMsg = array(
@@ -450,7 +447,7 @@ function sendMessageByUid($msg,$code,$action,$receiver)
 			);
 
 	$returnData=array();
-	//var_dump($newmsg);
+	var_dump($newmsg);
 	if(isset($tcp_worker->connectionsID[$receiver]))
 	{
         	$connection = $tcp_worker->connectionsID[$receiver];
