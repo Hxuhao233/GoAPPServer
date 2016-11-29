@@ -46,7 +46,7 @@ class user{
                 "code" => 200,
                 "data" => array(json_encode(array("Name" => $name)))
                 );  //成功返回用户名
-          var_dump($returnData);
+          //var_dump($returnData);
           return $returnData;
         /*}else{
           $returnData=array(

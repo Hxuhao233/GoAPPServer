@@ -88,15 +88,16 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 		case 'Login':
 
 			$userData=$jsonData["data"][0];
-			//var_dump($userData);
+			
 			$returnData = user::login($userData);
+
+			var_dump($returnData);
+			$connection->send(json_encode($returnData));
 			if($returnData["code"]==200){
 				if(!isset($connection->uid))
 					$connection->uid = $userData["account"] ;
 				echo $userData["account"] ." is online\n";
 				$tcp_worker->connectionsID[$connection->uid] = $connection;
-				$connection->send(json_encode($returnData));
-
 
 
 				$friendList = user::getFriends($userData['account']);
