@@ -44,7 +44,7 @@ class user{
           $returnData=array(
                 "action"=>"Login",
                 "code" => 200,
-                "data" => array(json_encode(array("Name" => $name)))
+                "data" => array(json_encode(array("Name" => $name,"account" => $userData['account'])))
                 );  //成功返回用户名
           //var_dump($returnData);
           return $returnData;
@@ -471,7 +471,7 @@ class user{
 
     public static function getOfflineResp($action,$account){
       $mysqli = new mysqlHandler("GoAPP","offlineResp");
-      $cols = "`targetAccount`, `targetAccountName`";
+      $cols = "`id`,`targetAccount`, `targetAccountName`";
       $conditions = array(
           "account" => $account,
           "action" => $action
@@ -485,11 +485,15 @@ class user{
                   'account' => $row['targetAccount'],
                   'Name' => $row['targetAccountName']
               );
+          $id = $row['id'];
+          $mysqli->delete($id);
           $ReqData[$i++] = json_encode($data); 
       }
       //var_dump($ReqData);
+
       return $ReqData;   
     }
+
 
 
     public static function setOfflineMsg($msg = array()){
@@ -499,7 +503,7 @@ class user{
 
     public static function getOfflineMsg($type,$receiver){
       $mysqli = new mysqlHandler("GoAPP","offlineMsg");
-      $col = "`type`,`sender`,`msg`,`time`";
+      $col = "`id`,`type`,`sender`,`msg`,`time`";
       $conditions = array(
           "type" => $type,
           "receiver" => $receiver
@@ -514,6 +518,9 @@ class user{
           $item['receiver'] = $receiver;
           $item['time'] = $row['time'];
           $offlineMsg[$i++] = json_encode($item);
+
+          $id = $row['id'];
+          $mysqli->delete($id);
       }
 
       return $offlineMsg;
@@ -614,12 +621,13 @@ $offlineReq = array(
         "targetAccountName" => "54321name"
     );
 user::handleOfflineResp('AddFriend',$offlineReq);
-user::handleOfflineResp('RefuseFriend',$offlineReq);
-$data = user::getOfflineResp('AddFriend',"13710685836");
-var_dump($data);
-$data = user::getOfflineResp('RefuseFriend',"13710685836");
-var_dump($data);*/
+user::handleOfflineResp('RefuseFriend',$offlineReq);*/
 /*
+$data = user::getOfflineResp('AcceptFriend',"12345");
+var_dump($data);
+$data = user::getOfflineResp('RefuseFriend',"12345");
+var_dump($data);
+
 $newF = array('USER01' => "123",'USER02'=>'13710685836');
 user::makeFriends($newF);
 */
