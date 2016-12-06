@@ -441,7 +441,7 @@ class user{
   // 查询离线好友请求
   public static function getOfflineReq($targetAccount){
         $mysqli = new mysqlHandler("GoAPP","offlineReq");
-        $cols = "`account`, `accountName`";
+        $cols = "`id`,`account`, `accountName`";
         $conditions = array(
             "targetAccount" => $targetAccount
             );
@@ -454,6 +454,8 @@ class user{
                     'account' => $row['account'],
                     'Name' => $row['accountName']
                 );
+            $id = $row['id'];
+            $mysqli->delete($id);
             $ReqData[$i++] = json_encode($data); 
         }
         //var_dump($ReqData);
