@@ -368,20 +368,43 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			$msg = $jsonData["data"][0];
 			var_dump($msg);
 			//var_dump($msg);
-			if(sendMessageByUid($msg,300,'Chat',$msg['receiver'])){
-				$returnData = array(
-							"action"=>"Chat",
-							"code"=>200
-							);
-
-			}
-			else{
-				$returnData = array(
-							"action"=>"Chat",
-							"code"=>200
-							);
+			switch ($msg['type']) {
+				case 'pos':
+					$info = user::getInformation($msg['receiver']);
+					if($info['allowPos']==1){
+						if(sendMessageByUid($msg,300,'Chat',$msg['receiver'])){
+							$returnData = array(
+										"action"=>"Chat",
+										"code"=>200
+										);
+						}else{
+						$returnData = array(
+									"action"=>"Chat",
+									"code"=>201
+									);
+						
+						}
+					}
+					break;
 				
+				case 'text':
+				default:
+					if(sendMessageByUid($msg,300,'Chat',$msg['receiver'])){
+						$returnData = array(
+									"action"=>"Chat",
+									"code"=>200
+									);
+
+					}else{
+						$returnData = array(
+									"action"=>"Chat",
+									"code"=>200
+									);
+						
+					}
+					break;
 			}
+			
 			$connection->send(json_encode($returnData));
 			break;
 
@@ -451,13 +474,13 @@ function sendMessageByUid($msg,$code,$action,$receiver)
 	var_dump($newmsg);
 	if(isset($tcp_worker->connectionsID[$receiver]))
 	{
-        	$connection = $tcp_worker->connectionsID[$receiver];
-        	//sleep(10);
-        	$connection->send(json_encode($newmsg));
-        	flush();
-        	return true;
+	        	$connection = $tcp_worker->connectionsID[$receiver];
+	        	//sleep(10);
+	        	$connection->send(json_encode($newmsg));
+	        	flush();
+	        	return true;
     	}else{
-    		//发送离线消息
+    			//发送离线消息
     		switch ($action) {
     			case 'AddFriend':
     				# code...
@@ -469,8 +492,9 @@ function sendMessageByUid($msg,$code,$action,$receiver)
     				break;
 
     			case 'Chat':
-    				user::setOfflineMsg($msg);
-
+    				if($msg['type']=="text")
+    					user::setOfflineMsg($msg);
+    				break;
 
     			default:
     				# code...
@@ -478,6 +502,7 @@ function sendMessageByUid($msg,$code,$action,$receiver)
     		}
     		return false;
     	}
+    	return false;
 }
 
 

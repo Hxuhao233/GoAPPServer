@@ -184,34 +184,14 @@ class user{
           );
     if($result = $mysqli->select($col,$conditions)){
 
-      $row=mysqli_fetch_row($result);
-      if($row[7]==2){//status,0=>保密,1=>对好友公开，2=>公开
-        $arr = array(
-          'ID'=>$row[0],
-          'Sex'=>$row[1],
-          'Age'=>$row[2],
-          'School'=>$row[3],
-          'Phone'=>$row[4],
-          'Account'=>$row[5],
-          'Name'=>$row[6],
-          'Status'=>$row[7],
-          );
-              //return $arr;
-              $returnData = array(
-                  "action"=>"SearchPerson",
-                  "code"=>200,
-                  "data"=>$arr
-                  );
+      $row=$result->fetch_assoc();
+      if($row['status']==2){
+        //status,0=>保密,1=>对好友公开，2=>公开
+        return $row;
       }
     }
+    return null;
 
-    //return null;
-    $returnData = array(
-        "action"=>"SearchPerson",
-        "code"=>207
-        );
-    var_dump($returnData);
-    return $returnData;
   }
 
 
