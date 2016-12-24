@@ -215,7 +215,8 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 
 			$account = $jsonData["data"][0]["account"];
 			$returnData = user::getInformation($account);
-
+			$returnData['code'] = 200;
+			$returnData['action'] = 'SearchPerson';
 
 			$connection->send(json_encode($returnData));
 			break;
@@ -369,8 +370,10 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 			var_dump($msg);
 			//var_dump($msg);
 			switch ($msg['type']) {
-				case 'pos':
+				case 'getPos':
+				
 					$info = user::getInformation($msg['receiver']);
+					var_dump($info);
 					if($info['allowPos']==1){
 						if(sendMessageByUid($msg,300,'Chat',$msg['receiver'])){
 							$returnData = array(
@@ -380,13 +383,20 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 						}else{
 						$returnData = array(
 									"action"=>"Chat",
-									"code"=>201
+									"code"=>200
 									);
 						
 						}
+					}else{
+						$returnData = array(
+									"action"=>"Chat",
+									"code"=>200
+									);
+						
 					}
 					break;
-				
+
+				case 'pos':
 				case 'text':
 				default:
 					if(sendMessageByUid($msg,300,'Chat',$msg['receiver'])){
@@ -404,7 +414,7 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 					}
 					break;
 			}
-			
+			var_dump($returnData);
 			$connection->send(json_encode($returnData));
 			break;
 

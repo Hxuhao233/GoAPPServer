@@ -175,13 +175,25 @@ class user{
    * @return array ['ID']['Sex']['Age']['School']['Phone']['Account']['Name']['Status']
    */
   public static function getInformation($account){
-    $mysqli = new mysqlHandler("GoAPP","information");
-    $col = "*";
+    $mysqli = new mysqlHandler("GoAPP","user");
+    $col = "id";
     $arr;
     $returnData;
     $conditions = array(
-          'Account' => $account
-          );
+          'account' => $account
+    );
+    $result = $mysqli->select($col,$conditions);
+    $row=$result->fetch_assoc();
+    if($row==null){
+        return null;
+    }
+
+    $mysqli->changeTable("information");
+    $col = "*";
+    $conditions = array(
+          'UserId' => $row['id']
+    );
+
     if($result = $mysqli->select($col,$conditions)){
 
       $row=$result->fetch_assoc();
