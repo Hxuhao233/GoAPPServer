@@ -492,6 +492,8 @@ class user{
 
     public static function setOfflineMsg($msg = array()){
       $mysqli = new mysqlHandler("GoAPP","offlineMsg");
+      unset($msg['longitude']);
+      unset($msg['latitude']);
       $mysqli->insert($msg);
     }
 
