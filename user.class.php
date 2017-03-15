@@ -33,7 +33,7 @@ class user{
       if($mysqli->update($updateData,$conditions)){
         //if($mysqli->getLink()->affected_rows==1){
           // 查询昵称
-          $col = "Name";
+          $col = "Name , icon";
           
           $conditions=array(
             'UserId' =>$userID
@@ -41,10 +41,15 @@ class user{
           $mysqli->changeTable("information");
           $result = $mysqli->select($col,$conditions);
           $name = $result->fetch_assoc()["Name"];
+          $icon = $result->fetch_assoc()["icon"];
           $returnData=array(
                 "action"=>"Login",
                 "code" => 200,
-                "data" => array(json_encode(array("Name" => $name,"account" => $userData['account'])))
+                "data" => array(
+                  json_encode(
+                    array("Name" => $name,
+                              "account" => $userData['account'],
+                              "Icon" => $icon)))
                 );  //成功返回用户名
           //var_dump($returnData);
           return $returnData;
@@ -242,7 +247,7 @@ class user{
   public static function getUserInfo($searchInfo){
     $mysqli = new mysqlHandler("GoAPP","user");
     $returnData = array();
-    $sql = "select `user`.`account` , `information`.`Name` 
+    $sql = "select `user`.`account` , `information`.`Name` ,`icon`
                 from `user`,`information`  
                 where  `user`.`id` = `information`.`UserId` 
                 and (`account` regexp \"$searchInfo+\" or `Name` regexp \"$searchInfo+\")";
