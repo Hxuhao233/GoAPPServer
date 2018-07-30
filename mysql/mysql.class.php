@@ -9,22 +9,9 @@ class mysqlHandler
 	private $table = null;
 	private $link = null;
 	private $result = null;
-/*
-	public function __set($name , $value){
-	        $this->values[$name] = $value;
-	}
 
-	public function __get($name){
-		if(isset($this->values[$name])){
-	            return $this->values[$name];
-	        }
-	        else{
-	            return null;
-	        }
-	 }
-*/
 	public function __construct($db,$table){
-		$this->link = new mysqli("127.0.0.1", "root", "", "$db");
+		$this->link = new mysqli("127.0.0.1", "root", "hxh896900488", "$db");
 		$this->link->query("SET NAMES utf8");
 		$this->table = $table;
 	}
@@ -35,6 +22,9 @@ class mysqlHandler
 			$this->result->free();
 	}
 
+	public function changeTable($table){
+		$this->table = $table;
+	}
 
 	public function getLink(){
 
@@ -42,11 +32,11 @@ class mysqlHandler
 	}
 
 
-	private function clear($data){
+	public function clear($data){
 		return $this->link->real_escape_string($data);
 	}
 
-	private function excute($query){
+	public function execute($query){
 		//$this->result = $this->link->query($query);
 		//return $this->result;
 		echo $query;
@@ -69,12 +59,13 @@ class mysqlHandler
 		//echo $qualifier;
 		$sql .=  $qualifier ? "WHERE $qualifier " :null;
 		//echo $sql;
-		return $this->excute($sql);
+		return $this->execute($sql);
 	}
 
 
 	public function update($data=array() ,$condition=array()){
 		$updateData = "";
+		//var_dump($condition);
 		//$data = $this->link->real_escape_string($data);
 		foreach($data as $key => $value){
 			if($key=="password")
@@ -98,16 +89,16 @@ class mysqlHandler
 
 		$sql = "UPDATE `$this->table` SET $updateData ";
 		$sql .=  $qualifier ? "WHERE $qualifier " :null;
-	//	echo $sql;
+		//echo $sql;
 
-		return $this->excute($sql);
+		return $this->execute($sql);
 	}
 
 	public function delete($id){
 
 		$sql= "DELETE FROM `$this->table`  WHERE `id` = $id";
 
-		return $this->excute($sql);
+		return $this->execute($sql);
 	}
 
 	public function insert($data=array()){
@@ -127,7 +118,7 @@ class mysqlHandler
 		$sql="INSERT INTO `$this->table` (".$colNames.") VALUES (".$colValues .')';
 		//echo $sql;
 
-		return $this->excute($sql);
+		return $this->execute($sql);
 	}
 
 

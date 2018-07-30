@@ -23,12 +23,16 @@ $tcp_worker->count = 1;
 
 $tcp_worker->onWorkerStart = function($worker)
 {
+	
 	// 定时，每10秒一次
 	Timer::add(10, function()use($worker)
-     	{
+     	{	
+
+
      		foreach ($worker->connectionsID as $key => $value) {
      			# code...
-     			echo "online user :$key\n";
+     			echo "online user :";
+     			echo "$key\n";
      		}
     	 });
 };
@@ -48,17 +52,26 @@ $tcp_worker->onConnect = function($connection)
 $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 {
 	//global $tcp_worker;
-	$data=str_replace("\r\n", "",$data);
-	echo "$data";
+	//var_dump($data);
 
+	$data=str_replace("\r\n", "",$data);
+	echo "$data\n";
+	
 	$returnData;
 	/*$decode = explode("|", $data);
 	$decode =str_replace("\r\n", "", $decode);*/
 	$jsonData=json_decode($data,true);
+	
+	//var_dump($jsonData["data"]);
+	$jsonData["data"][0]=json_decode($jsonData["data"][0],true);
+	$user = new user();
 	if(!isset($jsonData["action"])){
+		//var_dump($data);
 		$errormsg=array(
+					"action" => $jsonData["action"],
 					"code"=>414,
-					"data" => array("msg"=>"error msg type")
+					
+					"data" => array(json_encode(array("msg"=>"error msg type")))
 					);
 		//echo "from ". $connection->getRemoteIp()."\n";
 		$connection->send(json_encode($errormsg));
@@ -70,33 +83,76 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 	}
 	switch ($jsonData["action"]) {
 
-
-		//获取POI信息
-		//GetPOI|palce&location
-		case 'GetPOI':
-			# code...
-
-
-			$returnData =  getPOI::getPOIData($decode[1]);
-	    		$connection->send($returnData);
-			break;
-
 		//登录
-		//Login|account&password
+		//Login
 		case 'Login':
 
 			$userData=$jsonData["data"][0];
-			//var_dump($userData);
+			
 			$returnData = user::login($userData);
-			if($returnData["result"]=="OK"){
+
+			var_dump($returnData);
+			$connection->send(json_encode($returnData));
+			if($returnData["code"]==200){
 				if(!isset($connection->uid))
 					$connection->uid = $userData["account"] ;
+				echo $userData["account"] ." is online\n";
 				$tcp_worker->connectionsID[$connection->uid] = $connection;
 
-				//获取该用户的离线消息
 
+				$friendList = user::getFriends($userData['account']);
+				if(!empty($friendList)){
+					$connection->send(json_encode($friendList));
+				}
+			
+
+				
+				$offlineReq = $user::getOfflineReq($userData["account"]);
+				if(!empty($offlineReq)){
+					$offlineMsg = array(
+							"action" => "AddFriend",
+							"code" => 300,
+							"data" => $offlineReq
+						);
+					//echo json_encode($offlineMsg);
+					$connection->send(json_encode($offlineMsg));
+				}
+
+				$offlineResp = $user::getOfflineResp('AcceptFriend',$userData["account"]);
+				if(!empty($offlineResp)){
+					$offlineMsg = array(
+							"action" => "AcceptFriend",
+							"code" => 300,
+							"data" => $offlineResp
+						);
+					//echo json_encode($offlineMsg);
+					$connection->send(json_encode($offlineMsg));
+				}
+
+				$offlineResp2 = $user::getOfflineResp('RefuseFriend',$userData["account"]);
+				if(!empty($offlineResp2)){
+					$offlineMsg = array(
+							"action" => "RefuseFriend",
+							"code" => 300,
+							"data" => $offlineResp2
+						);
+					//echo json_encode($offlineMsg);
+					$connection->send(json_encode($offlineMsg));
+				}
+
+				$offlineMsg1 = $user::getOfflineMsg('text',$userData["account"]);
+				if(!empty($offlineMsg1)){
+					$offlineMsg = array(
+							"action" => "Chat",
+							"code" => 300,
+							"data" => $offlineMsg1
+						);
+					//echo json_encode($offlineMsg);
+					$connection->send(json_encode($offlineMsg));
+				}
 			}
-			$connection->send(json_encode($returnData));
+
+
 			break;
 
 
@@ -126,42 +182,264 @@ $tcp_worker->onMessage = function($connection, $data) use ($tcp_worker)
 		//注册
 		case 'Signup':
 			$userData = $jsonData["data"][0];
-			$returnData = user::signIn($userData);
+			$returnData = user::signUp($userData);
 
 
 			$connection->send(json_encode($returnData));
 			break;
 
+
+		//修改个人信息
+		case 'ModifyInfo':
+			$userData = $jsonData["data"][0];
+			$returnData = user::setIcon();
+
+
+			$connection->send(json_encode($returnData));
+			break;
+
+		//忘记密码
+		case 'FindPwd':
+			$userData = $jsonData["data"][0];
+			if(!isset($userData["password"]))
+				$returnData = $user->forgetPWD1($userData);
+			else
+				$returnData = $user->forgetPWD2($userData);
+
+			$connection->send(json_encode($returnData));
+			break;
+
+
+		//搜索他人信息
+		case 'SearchPerson':
+
+			$account = $jsonData["data"][0]["account"];
+			$returnData = user::getInformation($account);
+			$returnData['code'] = 200;
+			$returnData['action'] = 'SearchPerson';
+
+			$connection->send(json_encode($returnData));
+			break;
+
+		//添加好友
+		case 'AddFriend':
+			$returnData;
+			$msg = $jsonData["data"][0];
+			//$msg["receiver"] = $msg[];
+			$data1;
+			//对接受请求者发送
+			foreach ($msg as $key => $value) {
+				# code...
+				$data1[$key] = $value;
+			}
+			// $sendData = array(
+			// 		"code" => 300,
+			// 		"action" => "AddFriend",
+			// 		"data" => array(json_encode($data1))
+			// 				);
+			if(sendMessageByUid($data1,300,"AddFriend",$msg["targetAccount"])){
+				
+				// 对方在线
+				// 对发送请求者发送
+				$returnData = array(
+						'action' => 'AddFriend',
+						'code' => 200,
+								);
+
+			}else{
+
+				// 对方离线
+				// 对发送请求者发送
+				$returnData = array(
+						'action' => 'AddFriend',
+						'code' => 200,
+				);				
+			}
+
+			$connection->send(json_encode($returnData));
+			break;
+
+		//接受好友请求
+		case 'AcceptFriend':
+
+			$msg = $jsonData["data"][0];
+			
+
+			$newFriend = array(
+					$msg['account'],
+					$msg['targetAccount']
+				);
+			user::makeFriends($newFriend);
+
+			$data2;
+			//向发起好友者发送
+			foreach ($msg as $key => $value) {
+				# code...
+				$data2[$key] = $value;
+			}
+			if(sendMessageByUid($data2,300,'AcceptFriend',$msg['account'])){
+				// 对方在线
+				// 向接受好友请求者发送
+				$returnData = array(
+					'action' => 'AcceptFriend',
+					'code' => 200
+					);
+				
+			}else{
+
+				// 对方离线
+				// 向接受好友请求者发送
+				$returnData = array(
+					'action' => 'AcceptFriend',
+					'code' => 200
+					);
+				
+			}
+
+
+			$connection->send(json_encode($returnData));
+			break;
+
+
+		//拒绝好友请求
+		case 'RefuseFriend':
+
+			$msg = $jsonData["data"][0];
+			
+
+			//向发起好友者发送
+			$data2;
+			foreach ($msg as $key => $value) {
+				# code...
+				$data2[$key] = $value;
+			}
+
+			if(sendMessageByUid($data2,300,'RefuseFriend',$msg['account'])){
+				
+				//向接受好友请求者发送
+				$returnData = array(
+					'action' => 'RefuseFriend',
+					'code' => 200
+					);
+				
+			}else{
+				$returnData = array(
+					'action' => 'RefuseFriend',
+					'code' => 200
+					);
+	
+			}
+
+			$connection->send(json_encode($returnData));
+			break;
+
+		
+		// 查找用户
+		case 'GetUserInfo':
+			$returnData;
+			$info = $jsonData['data'][0]['info'];
+			if(!is_null($info) && $info !=""){
+				$UserInfo = user::getUserInfo($info);
+			}	
+			$returnData['action'] = 'GetUserInfo';
+			$returnData['code'] = 200;
+			$returnData['data'] = $UserInfo;
+	
+			$connection->send(json_encode($returnData));
+			
+			break;
+
+
+		// 获取好友信息
+		case 'GetFriendList':
+			$msg = $jsonData["data"][0];
+			$returnData = user::getFriends($msg['account']);
+
+			$connection->send(json_encode($returnData));
+		break;
+
+
+
+
 		//发送消息
 		//Send|reciverName&message
-		case 'Send':
+		case 'Chat':
 			# code...
 
 			$msg = $jsonData["data"][0];
+			var_dump($msg);
 			//var_dump($msg);
-			if(sendMessageByUid($msg))
-				$connection->send("send succeed\n");
-			else
-				$connection->send('send failed\n');
+			switch ($msg['type']) {
+				case 'getPos':
+				
+					$info = user::getInformation($msg['receiver']);
+					var_dump($info);
+					if($info['allowPos']==1){
+						if(sendMessageByUid($msg,300,'Chat',$msg['receiver'])){
+							$returnData = array(
+										"action"=>"Chat",
+										"code"=>200
+										);
+						}else{
+						$returnData = array(
+									"action"=>"Chat",
+									"code"=>200
+									);
+						
+						}
+					}else{
+						$returnData = array(
+									"action"=>"Chat",
+									"code"=>200
+									);
+						
+					}
+					break;
+
+				case 'pos':
+				case 'text':
+				default:
+					if(sendMessageByUid($msg,300,'Chat',$msg['receiver'])){
+						$returnData = array(
+									"action"=>"Chat",
+									"code"=>200
+									);
+
+					}else{
+						$returnData = array(
+									"action"=>"Chat",
+									"code"=>200
+									);
+						
+					}
+					break;
+			}
+			var_dump($returnData);
+			$connection->send(json_encode($returnData));
 			break;
 
 		default:
-			$errormsg=array("code"=>444,
-					"data" => array("msg"=>"unknown msg type"));
-			$connection->send(json_encode($errormsg));
+			$returnData=array(
+					"action" => $jsonData["action"],
+					"code" => 444,
+					"data" => array("msg"=>"unknown msg type")
+					);
+			//$connection->send(json_encode($errormsg));
 
-			sleep(5);
-			$connection->send(json_encode($errormsg));
+		
+			$connection->send(json_encode($returnData));
 			break;
 
 	}
+	var_dump(json_encode($returnData));
+	//$connection->send(json_encode($returnData));
 
 };
 
 //当客户端连接错误时
 $tcp_worker->onError = function($connection, $code, $msg)
 {
-    echo "$connection error $code $msg\n";
+    echo "connection error  $code  $msg\n";
 };
 
 $tcp_worker->onClose = function($connection) use($tcp_worker)
@@ -170,8 +448,11 @@ $tcp_worker->onClose = function($connection) use($tcp_worker)
 	foreach ($tcp_worker->connectionsID as $key=>$value) {
 		# code...
 		if($value==$connection){
+			$result = user::logout(array("account"=>$key));
+			
 			unset($tcp_worker->connectionsID[$key]);
-			echo "connection with $key closed\n";
+			if($result["code"]==200)
+				echo "connection with $key closed\n";
 		}
 
 	}
@@ -184,27 +465,55 @@ $tcp_worker->onWorkerStop = function($worker)
 };
 
 //通过connectionID发送消息
-function sendMessageByUid($msg)
+function sendMessageByUid($msg,$code,$action,$receiver)
 {
 	global $tcp_worker;
-	$sender=$msg["sender"];
-	$receiver=$msg["receiver"];
-	$msginfo=$msg["msginfo"];
-	$newmsg=array("sender"=>$sender,
-			"msginfo"=>$msginfo);
+	//var_dump($msg);
+	//$receiver=$msg["receiver"];
+	
+	if(is_null($receiver) || $receiver =="")
+		return false;
+
+	$newmsg=array(
+			"action"=>$action,
+			"code"=>$code,
+			"data"=>array(json_encode($msg))		
+			);
+
+	$returnData=array();
 	var_dump($newmsg);
 	if(isset($tcp_worker->connectionsID[$receiver]))
 	{
 	        	$connection = $tcp_worker->connectionsID[$receiver];
+	        	//sleep(10);
 	        	$connection->send(json_encode($newmsg));
+	        	flush();
 	        	return true;
     	}else{
-    		//发送离线消息
+    			//发送离线消息
+    		switch ($action) {
+    			case 'AddFriend':
+    				# code...
+    				user::handleOfflineReq($msg);
+    				break;
+    			case 'AcceptFriend':
+    			case 'RefuseFriend':
+    				user::handleOfflineResp($action,$msg);
+    				break;
 
+    			case 'Chat':
+    				if($msg['type']=="text")
+    					user::setOfflineMsg($msg);
+    				break;
+
+    			default:
+    				# code...
+    				break;
+    		}
     		return false;
     	}
+    	return false;
 }
-
 
 
 
